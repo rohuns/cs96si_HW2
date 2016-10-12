@@ -8,6 +8,7 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -18,6 +19,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         super.viewDidLoad()
         tableView.rowHeight = 110.0;
         
+        let hud = MBProgressHUD.showAdded(to: self.view, animated: true)
+        hud.label.text = "Loading results..."
         let url = URL(string: "https://healthfinder.gov/developer/MyHFSearch.json?api_key=demo_api_key&who=child&age=16&gender=male")
         let request = URLRequest(url: url!)
         let session = URLSession(
@@ -33,8 +36,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                         print("response \(results["Topics"])")
                         self.topics = results["Topics"] as? [NSDictionary]
                         self.tableView.reloadData()
+                        hud.hide(animated: true)
                     }
                 }
+            } else {
+                hud.hide(animated: true)
+                let alertController = UIAlertController(title: "Error", message: "No results retrieved", preferredStyle: .alert)
+                let OKAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(OKAction)
+                self.present(alertController, animated: true, completion: nil)
             }
         }
         task.resume()
