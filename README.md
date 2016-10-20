@@ -9,9 +9,12 @@ Time spent: 2.5 hours spent in total
 The following **required** functionality is completed:
 
 - [ ] User can search for HealthFinder topics using a UISearchBar
-- [ ] User can show and hide filter controls using a UISwitch
 - [ ] User can use a UIPickerView to select an age
 - [ ] Delegates/Protocols are used to update the searching functionality
+
+The following optional features are implemented:
+- [ ] User can show and hide filter controls using a UISwitch
+
 
 
 ## Video Walkthrough
