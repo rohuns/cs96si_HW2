@@ -17,6 +17,7 @@ class HealthFindersFiltersViewController: UIViewController,UIPickerViewDataSourc
 
     var delegate:HealthFinderFiltersDelegate?
     
+    @IBOutlet var filtersView: UIView!
     @IBOutlet var agePickerView: UIPickerView!
     @IBOutlet var genderSegControl: UISegmentedControl!
     override func viewDidLoad() {
@@ -50,6 +51,15 @@ class HealthFindersFiltersViewController: UIViewController,UIPickerViewDataSourc
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         filtersDidChange(pickerView)
+    }
+    
+    
+    @IBAction func filtersViewChanged(_ sender: AnyObject) {
+        if(filtersView.isHidden){
+            filtersView.isHidden = false
+        }else{
+            filtersView.isHidden = true
+        }
     }
     
     
