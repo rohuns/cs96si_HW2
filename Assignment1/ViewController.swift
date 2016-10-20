@@ -10,18 +10,28 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
     var topics: [NSDictionary]?
     
+    @IBOutlet var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.rowHeight = 110.0;
+        searchBar.delegate = self
         
+        
+        
+    }
+    
+    func searchWithQuery(query: String){
+        if(query == ""){
+            return
+        }
         let hud = MBProgressHUD.showAdded(to: self.view, animated: true)
         hud.label.text = "Loading results..."
-        let url = URL(string: "https://healthfinder.gov/developer/MyHFSearch.json?api_key=demo_api_key&who=child&age=16&gender=male")
+        let url = URL(string: "https://healthfinder.gov/api/v2/topicsearch.json?api_key=demo_api_key&Keyword=\(query)")
         let request = URLRequest(url: url!)
         let session = URLSession(
             configuration: URLSessionConfiguration.default,
@@ -32,13 +42,18 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let task = session.dataTask(with: request) { (dataOrNil, response, err) in
             if let data = dataOrNil {
                 if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
-                    if let results = responseDictionary["Result"] as? NSDictionary {
-                        print("response \(results["Topics"])")
-                        self.topics = results["Topics"] as? [NSDictionary]
-                        self.tableView.reloadData()
-                        hud.hide(animated: true)
+                    if let results = responseDictionary["Result"] as? NSDictionary{
+                        if let resources = results["Resources"] as? NSDictionary {
+                            if let topics = resources["Resource"] as? [NSDictionary]{
+                                print("response \(topics)")
+                                self.topics = topics
+                                self.tableView.reloadData()
+                                hud.hide(animated: true)
+                            }
+                        }
+
                     }
-                }
+                                    }
             } else {
                 hud.hide(animated: true)
                 let alertController = UIAlertController(title: "Error", message: "No results retrieved", preferredStyle: .alert)
@@ -49,7 +64,47 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
         task.resume()
     }
-
+    
+    
+//    func oldSearch(){
+//        let hud = MBProgressHUD.showAdded(to: self.view, animated: true)
+//        hud.label.text = "Loading results..."
+//        let url = URL(string: "https://healthfinder.gov/developer/MyHFSearch.json?api_key=demo_api_key&who=child&age=16&gender=male")
+//        let request = URLRequest(url: url!)
+//        let session = URLSession(
+//            configuration: URLSessionConfiguration.default,
+//            delegate:nil,
+//            delegateQueue:OperationQueue.main
+//        )
+//        
+//        let task = session.dataTask(with: request) { (dataOrNil, response, err) in
+//            if let data = dataOrNil {
+//                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
+//                    if let results = responseDictionary["Result"] as? NSDictionary {
+//                        print("response \(results["Topics"])")
+//                        self.topics = results["Topics"] as? [NSDictionary]
+//                        self.tableView.reloadData()
+//                        hud.hide(animated: true)
+//                    }
+//                }
+//            } else {
+//                hud.hide(animated: true)
+//                let alertController = UIAlertController(title: "Error", message: "No results retrieved", preferredStyle: .alert)
+//                let OKAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+//                alertController.addAction(OKAction)
+//                self.present(alertController, animated: true, completion: nil)
+//            }
+//        }
+//        task.resume()
+//    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchWithQuery(query: searchText)
+    }
+    
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let topics = topics {
             return topics.count
