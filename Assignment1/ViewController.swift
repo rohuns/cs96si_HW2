@@ -10,7 +10,7 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate, HealthFinderFiltersDelegate {
 
     var topics: [NSDictionary]?
     
@@ -66,38 +66,43 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     
-//    func oldSearch(){
-//        let hud = MBProgressHUD.showAdded(to: self.view, animated: true)
-//        hud.label.text = "Loading results..."
-//        let url = URL(string: "https://healthfinder.gov/developer/MyHFSearch.json?api_key=demo_api_key&who=child&age=16&gender=male")
-//        let request = URLRequest(url: url!)
-//        let session = URLSession(
-//            configuration: URLSessionConfiguration.default,
-//            delegate:nil,
-//            delegateQueue:OperationQueue.main
-//        )
-//        
-//        let task = session.dataTask(with: request) { (dataOrNil, response, err) in
-//            if let data = dataOrNil {
-//                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
-//                    if let results = responseDictionary["Result"] as? NSDictionary {
-//                        print("response \(results["Topics"])")
-//                        self.topics = results["Topics"] as? [NSDictionary]
-//                        self.tableView.reloadData()
-//                        hud.hide(animated: true)
-//                    }
-//                }
-//            } else {
-//                hud.hide(animated: true)
-//                let alertController = UIAlertController(title: "Error", message: "No results retrieved", preferredStyle: .alert)
-//                let OKAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-//                alertController.addAction(OKAction)
-//                self.present(alertController, animated: true, completion: nil)
-//            }
-//        }
-//        task.resume()
-//    }
+    func searchWithFilters(age: Int, gender: String){
+        let hud = MBProgressHUD.showAdded(to: self.view, animated: true)
+        hud.label.text = "Loading results..."
+        let url = URL(string: "https://healthfinder.gov/developer/MyHFSearch.json?api_key=demo_api_key&who=child&age=\(age)&gender=\(gender)")
+        let request = URLRequest(url: url!)
+        let session = URLSession(
+            configuration: URLSessionConfiguration.default,
+            delegate:nil,
+            delegateQueue:OperationQueue.main
+        )
+        
+        let task = session.dataTask(with: request) { (dataOrNil, response, err) in
+            if let data = dataOrNil {
+                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
+                    if let results = responseDictionary["Result"] as? NSDictionary {
+                        print("response \(results["Topics"])")
+                        self.topics = results["Topics"] as? [NSDictionary]
+                        self.tableView.reloadData()
+                        hud.hide(animated: true)
+                    }
+                }
+            } else {
+                hud.hide(animated: true)
+                let alertController = UIAlertController(title: "Error", message: "No results retrieved", preferredStyle: .alert)
+                let OKAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(OKAction)
+                self.present(alertController, animated: true, completion: nil)
+            }
+        }
+        task.resume()
+    }
     
+    
+    // Implement delegate for healthfinderfilter protocol
+    func filtersWereUpdated(gender: String, age: Int) {
+        searchWithFilters(age: age, gender: gender)
+    }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         searchWithQuery(query: searchText)
@@ -132,6 +137,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             let indexPath = tableView.indexPath(for: cell)
             let destinationVC = segue.destination as! HealthFinderDetailViewController
             destinationVC.sections = topics![indexPath!.row]["Sections"] as? [NSDictionary]
+        }
+        if (segue.identifier == "filters_segue"){
+            let destinationVC = segue.destination as? HealthFindersFiltersViewController
+            destinationVC?.delegate = self
         }
     }
 }
