@@ -4,6 +4,7 @@
 //
 //  Created by Sherman Leung on 9/21/16.
 //  Copyright © 2016 Sherman Leung. All rights reserved.
+// Started with Sherman's project, because I was tinkering around with my project 1, so it was not in a place where I could easily build off of
 //
 
 import UIKit
